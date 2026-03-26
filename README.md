@@ -1,14 +1,29 @@
-# Reliable-UDP-Transfer
 # Reliable UDP File Transfer
 
-A lightweight reliable file transfer system built over UDP.
+Reliable file transfer over UDP using chunking, ACKs, resume support, and SHA256 validation.
 
-## Features
-- Chunk-based transfer
-- Resume interrupted transfers
-- SHA256 integrity checking
-- Sliding window optimization
+## Table of Contents
+- [Quick Start](#quick-start)
+- [How It Works](#how-it-works)
+- [Files](#files)
 
-## How to Run
-python server.py  
+## Quick Start
+```bash
+python server.py
 python client.py
+```
+
+## How It Works
+1. Client sends START and receives last confirmed chunk.
+2. Client sends file hash, then chunked packets with sequence numbers.
+3. Server ACKs received chunks and rebuilds the file on END.
+4. Server verifies SHA256 hash to confirm integrity.
+
+## Files
+- client.py: Sender logic with sliding window.
+- server.py: Receiver logic with ACK and file reconstruction.
+- protocol.py: Packet and ACK encoding helpers.
+- utils.py: SHA256 hash helper.
+- file.txt: Sample input file.
+
+
