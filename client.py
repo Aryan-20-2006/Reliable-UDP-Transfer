@@ -1,6 +1,5 @@
-# client.py
-
 import socket
+import time
 from protocol import create_packet, parse_ack
 from utils import calculate_hash
 
@@ -14,7 +13,20 @@ sock.settimeout(TIMEOUT)
 
 filename = "file.txt"
 
-# STEP 1: Start + get resume info
+#METRICS
+start_time = None
+end_time = None
+
+total_bytes_sent = 0
+total_packets_sent = 0
+retransmissions = 0
+acks_received = 0
+
+send_times = {}
+#
+
+# STEP 1: Start + timing
+start_time = time.time()
 sock.sendto(b"START", SERVER_ADDR)
 
 data, _ = sock.recvfrom(1024)
@@ -47,7 +59,7 @@ with open(filename, "rb") as f:
 
 total_packets = len(packets)
 
-# STEP 4: Sliding window send
+# STEP 4: Sliding window
 base = 0
 acked = set()
 
@@ -56,7 +68,13 @@ while base < total_packets:
     # Send window
     for i in range(base, min(base + WINDOW_SIZE, total_packets)):
         seq, packet = packets[i]
+
         sock.sendto(packet, SERVER_ADDR)
+
+        total_packets_sent += 1
+        total_bytes_sent += len(packet)
+
+        send_times[seq] = time.time()
 
     try:
         while True:
@@ -65,9 +83,15 @@ while base < total_packets:
 
             if ack_seq is not None:
                 acked.add(ack_seq)
+                acks_received += 1
+
+                # latency calculation
+                if ack_seq in send_times:
+                    latency = time.time() - send_times[ack_seq]
+                    print(f"Latency for packet {ack_seq}: {latency:.4f} sec")
 
     except socket.timeout:
-        pass
+        retransmissions += WINDOW_SIZE  # approx
 
     # Slide window
     while base < total_packets and packets[base][0] in acked:
@@ -76,5 +100,20 @@ while base < total_packets:
 
 # STEP 5: End transfer
 sock.sendto(b"END", SERVER_ADDR)
+end_time = time.time()
 
-print("File sent successfully")
+#METRICS OUTPUT
+total_time = end_time - start_time
+
+throughput = total_bytes_sent / total_time if total_time > 0 else 0
+loss_rate = retransmissions / total_packets_sent if total_packets_sent > 0 else 0
+efficiency = (total_packets_sent - retransmissions) / total_packets_sent if total_packets_sent > 0 else 0
+
+print("\n--- Performance Metrics ---")
+print(f"Time Taken: {total_time:.4f} sec")
+print(f"Throughput: {throughput:.2f} bytes/sec")
+print(f"Total Packets Sent: {total_packets_sent}")
+print(f"Retransmissions: {retransmissions}")
+print(f"Packet Loss Rate: {loss_rate:.4f}")
+print(f"Efficiency: {efficiency:.4f}")
+print(f"ACKs Received: {acks_received}")

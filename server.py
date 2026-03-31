@@ -1,6 +1,5 @@
-# server.py
-
 import socket
+import random
 from protocol import parse_packet, create_ack
 from utils import calculate_hash
 
@@ -47,6 +46,12 @@ while True:
 
         break
 
+    # PACKET LOSS SIMULATION 
+    # simulate 20% packet loss
+    if random.random() < 0.2:
+        print("Packet dropped!")
+        continue
+
     # STEP 4: Receive chunk
     seq, chunk = parse_packet(data)
 
@@ -58,5 +63,3 @@ while True:
 
     # Send ACK
     sock.sendto(create_ack(seq), addr)
-    
-    
