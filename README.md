@@ -16,47 +16,43 @@ A reliable and resumable file transfer system built over UDP using custom protoc
 
 ---
 
-## How It Works
+## System Overview
 
-1. Client sends a `START` request to the server.
-2. Server responds with the last received chunk (resume support).
-3. Client sends file hash for integrity verification.
-4. File is split into chunks and sent with sequence numbers.
-5. Server acknowledges each chunk (ACKs).
-6. Sliding window improves throughput by sending multiple packets.
-7. On completion, server reconstructs the file.
-8. Hash is verified to ensure file integrity.
+This system implements a reliable data transfer protocol over UDP by incorporating mechanisms similar to transport layer protocols.
 
----
+The workflow is as follows:
 
-## Performance Metrics
-
-The system evaluates performance using the following metrics:
-
-- Throughput  
-  Measures how fast data is transferred (bytes/sec)
-
-- Transfer Time  
-  Total time taken for file transfer
-
-- Retransmissions  
-  Number of packets resent due to loss
-
-- Packet Loss Rate  
-  Ratio of retransmissions to total packets sent
-
-- Efficiency  
-  Ratio of successful transmissions to total transmissions
-
-- Latency (per packet)  
-  Time taken for a packet to receive acknowledgment
+1. The client initiates communication using a `START` message.
+2. The server responds with the last successfully received chunk.
+3. The client resumes transmission from that point.
+4. File data is divided into fixed-size chunks with sequence numbers.
+5. Each chunk is sent and acknowledged by the server.
+6. A sliding window mechanism is used to improve throughput.
+7. After all chunks are received, the server reconstructs the file.
+8. A SHA-256 hash is used to verify file integrity.
 
 ---
 
-## Packet Loss Simulation
+## Setup Instructions
 
-To simulate real-world network conditions, random packet loss is introduced at the server:
+### Prerequisites
 
-```python
-if random.random() < 0.2:
-    continue
+- Python 3.x installed on your system
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <your-repo-url>
+   cd <repository-folder>
+
+### Usage Instructions
+
+Step 1:Start the Server
+
+python server.py
+
+Step 2:Run the Client
+
+python client.py
+
