@@ -56,3 +56,13 @@ Step 2:Run the Client
 
 python client.py
 
+
+Conclusion
+
+This project demonstrates how reliability, ordering, and efficiency can be implemented over UDP using custom mechanisms. It highlights concepts such as retransmission, flow control, and data integrity in unreliable network environments.
+
+Contributors 
+-Aryan Burman-https://github.com/Aryan-20-2006/Reliable-UDP-Transfer
+-Blason Raj Immanuel-https://github.com/blason2108
+-Basava Prabhu-https://github.com/basavaprabhu46
+
